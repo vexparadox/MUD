@@ -5,12 +5,12 @@ app = Flask(__name__)
 db = MySQLdb.connect("localhost","root","","flask")
 cursor = db.cursor()
 def checkLogin(userID):
-	q = "SELECT * FROM users WHERE userID = '{}'".format(userID);
+	q = "SELECT username FROM users WHERE userID = '{}'".format(userID);
 	cursor.execute(q)
 	if not cursor.rowcount:
-		return False
+		return cursor.fetchone()['username']
 	else:
-		return True
+		return None
 
 
 @app.route("/")
@@ -68,3 +68,4 @@ def get_task(quest_id):
 if __name__ == "__main__":
     app.run()
     db.close()
+    cursor.close()
