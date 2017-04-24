@@ -20,9 +20,8 @@ def root():
 @app.route('/api/register/<string:username>', methods=['GET'])
 def register(username):
 	userID = uuid.uuid4().hex
-	query = """INSERT INTO users (userID, invID, username, XP) VALUES ('{}', 0, '{}', 0)""".format(userID, username)
 	try:
-		cursor.execute(query)
+		cursor.execute("INSERT INTO users (userID, invID, username, XP) VALUES (%s, 0, %s, 0)", (userID, username))
 		db.commit()
 		d = {"userID": userID}
 		return jsonify(d)
