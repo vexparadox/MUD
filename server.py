@@ -25,11 +25,21 @@ def checkToken(token):
 		return False
 	else:
 		return True
-@app.route("/")
-def root():
-    return "No api in root."
 
-@app.route('/api/users/register/', methods=['POST'])
+@app.route('/api/user/location/', methods=['POST'])
+def location():
+	if not request.json:
+		return jsonify({'error': "No data detected."})
+	if 'token' in request.json:
+		if checkToken(request.json['token']):
+			cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
+			return jsonify({'location': cursor.fetchone()[4]})
+		else:
+			return jsonify({'error': "Invalid token."})
+	else:
+		return jsonify({'error': "Incorrect data format."})
+
+@app.route('/api/user/register/', methods=['POST'])
 def register():
 	if not request.json:
 		return jsonify({'error': "No data detected."})
@@ -46,7 +56,7 @@ def register():
 		return jsonify({'error': "Incorrect data format."})
 
 
-@app.route('/api/users/salt/', methods=['POST'])
+@app.route('/api/user/salt/', methods=['POST'])
 def getSalt():
 	if not request.json:
 		return jsonify({'error': "No data detected."})
@@ -57,7 +67,7 @@ def getSalt():
 	return jsonify({'salt': cursor.fetchone()[3]})
 
 
-@app.route('/api/users/login/', methods=['POST'])
+@app.route('/api/user/login/', methods=['POST'])
 def loginCheck():
 	if not request.json:
 		return jsonify({'error': "No data detected."})
@@ -94,13 +104,6 @@ def quests():
 		return jsonify({'quests': quests})
 	else:
 		return jsonify({'error': "Invalid token."})
-
-@app.route('/api/quests/<int:quest_id>', methods=['GET'])
-def get_task(quest_id):
-    quest = [quest for quest in quests if quests['id'] == quest_id]
-    if len(quest) == 0:
-        abort(404)
-    return jsonify({'quest': quests[0]})
 
 if __name__ == "__main__":
     app.run()

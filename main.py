@@ -38,6 +38,9 @@ def switchCommands(command, parameter):
 	if command == "register":
 		register()
 		return
+	if command == "location" or command == "loc":
+		location()
+		return
 	print "Unknown command, try using \"help\" or \"?\""
 
 def printHelp():
@@ -81,8 +84,8 @@ def login():
 			print "Failed to retieve salt."
 			return
 		password = hashlib.sha256(password+salt).hexdigest()
-		r = requests.post("http://localhost:5000/api/users/login/", json={'username': username, 'password': password})
-		if not r.json()['result']:
+		r = requests.post("http://localhost:5000/api/user/login/", json={'username': username, 'password': password})
+		if 'result' not in r.json():
 			print "Error: {}".format(r.json()['error'])
 		else:
 			if r.json()['result'] == "true": 
@@ -94,9 +97,21 @@ def login():
 				print "Login failed. Probably a wrong password"
 				loggedIn = False
 
+def location():
+	global userToken
+	global loggedIn
+	if loggedIn:
+		r = requests.post("http://localhost:5000/api/user/location/", json={'token': userToken})
+		if 'location' not in r.json():
+			print "Error: {}".format(r.json()['error'])
+		else:
+			print "You're currently sat in: {}".format(r.json()['location'])
+	else:
+		print "Please use >login first."
+
 def getSalt(username):
-	r = requests.post("http://localhost:5000/api/users/salt/", json={'username': username})
-	if not r.json()['salt']:
+	r = requests.post("http://localhost:5000/api/user/salt/", json={'username': username})
+	if 'salt' not in r.json():
 		print "Error: {}".format(r.json()['error'])
 		return None
 	else:
@@ -109,10 +124,13 @@ def register():
 	if password != password2:
 		print "Passwords don't match, try again."
 		return
+	if len(username) < 6 or len(password) < 6:
+		print "Username and password must be greater than 6 characters."
+		return
 	salt = uuid.uuid4().hex
 	password = hashlib.sha256(password+salt).hexdigest()
-	r = requests.post("http://localhost:5000/api/users/register/", json={'username' : username, 'password': password, 'salt': salt})
-	if not r.json()['result']:
+	r = requests.post("http://localhost:5000/api/user/register/", json={'username' : username, 'password': password, 'salt': salt})
+	if 'result' not in r.json():
 		print "Error: {}".format(r.json()['error'])
 	else:
 		if r.json()['result'] == "true":
