@@ -1,142 +1,53 @@
-import requests
-import base64
-import os.path
-import uuid
-import hashlib
-userToken = ""
-loggedIn = False
-running = True
+import commands
+from globals import *
 def main():
 	global running
+	if not commands.getMap():
+		print "Map failed to download, server seems to be down."
+		return
 	userInput = ""
+	print "Welcome to MUD, type \"help\" for a list of commands."
 	while(running):
 		# Split up the user input
 		userInput = raw_input("> ").split()
 		if userInput != []:
 			command = userInput[0] # Get the first word, or the command
-			# If there's more than one word, take the parameter
-			parameter = None
-			if len(userInput) > 1:
-				parameter = userInput[1] 
-			switchCommands(command, parameter)
+			parameters = userInput[1:] # Get the rest of the words
+			switchCommands(command, parameters)
 
-
-def switchCommands(command, parameter):
+# Switches on the command and passes in parameters
+# command is a single word
+# parameters is an array of parameters
+def switchCommands(command, parameters):
 	global running
 	if command == "quests":
-		quests(parameter)
+		commands.quests(parameters)
 		return
-	if command == "help":
-		printHelp()
+	if command == "help" or command == "?":
+		commands.printHelp()
 		return
 	if command == "exit" or command == "quit" or command == "q":
 		running = False
 		return
 	if command == "login":
-		login()
+		commands.login()
 		return
 	if command == "register":
-		register()
+		commands.register()
+		return
+	if command == "inv":
+		commands.inventory()
+		return
+	if command == "look":
+		commands.look(parameters)
 		return
 	if command == "location" or command == "loc":
-		location()
+		commands.location()
 		return
 	print "Unknown command, try using \"help\" or \"?\""
-
-def printHelp():
-	print "quit/exit/q - exit the program"
-	print "login [userID] - verify your userID and store it for use later"
-	print " === Requires Login === "
-	print "quests - list the quests available on the server"
-	print "userid - print your current userID"
-
-# Get the quests, checks for login
-def quests(parameter):
-	global userToken
-	global loggedIn
-	if not loggedIn or not userToken:
-		print "Please use the >login command first."
-		return
-	if not parameter:
-		getQuests()
-	# take quests
-def getQuests():
-	r = requests.post("http://localhost:5000/api/quests/", json= {'token' : userToken})
-	if 'quests' not in r.json():
-		print "Error: {}".format(r.json()['error'])
-	else:
-		print " === Quests Available === "
-		for quest in r.json()['quests']:
-			print "Title > {}".format(quest['title']) 
-			print "Description > {}".format(quest['description'])
-			print "QuestID > {}".format(quest['questID'])
-			print "--------------------"
-
-# "Logs in" actually just checks the validity of the userID and stores it
-def login():
-	global userToken
-	global loggedIn
-	username = raw_input("Enter your username > ")
-	password = raw_input("Enter your password > ")
-	if username and password:
-		salt = getSalt(username)
-		if not salt:
-			print "Failed to retieve salt."
-			return
-		password = hashlib.sha256(password+salt).hexdigest()
-		r = requests.post("http://localhost:5000/api/user/login/", json={'username': username, 'password': password})
-		if 'result' not in r.json():
-			print "Error: {}".format(r.json()['error'])
-		else:
-			if r.json()['result'] == "true": 
-				userToken = r.json()['token']
-				loggedIn = True
-				print "Login successfull."
-				return
-			else:
-				print "Login failed. Probably a wrong password"
-				loggedIn = False
-
-def location():
-	global userToken
-	global loggedIn
-	if loggedIn:
-		r = requests.post("http://localhost:5000/api/user/location/", json={'token': userToken})
-		if 'location' not in r.json():
-			print "Error: {}".format(r.json()['error'])
-		else:
-			print "You're currently sat in: {}".format(r.json()['location'])
-	else:
-		print "Please use >login first."
-
-def getSalt(username):
-	r = requests.post("http://localhost:5000/api/user/salt/", json={'username': username})
-	if 'salt' not in r.json():
-		print "Error: {}".format(r.json()['error'])
-		return None
-	else:
-		return r.json()['salt']
-
-def register():
-	username = raw_input("Enter a username > ")
-	password = raw_input("Enter a password > ")
-	password2 = raw_input("Enter the password again > ")
-	if password != password2:
-		print "Passwords don't match, try again."
-		return
-	if len(username) < 6 or len(password) < 6:
-		print "Username and password must be greater than 6 characters."
-		return
-	salt = uuid.uuid4().hex
-	password = hashlib.sha256(password+salt).hexdigest()
-	r = requests.post("http://localhost:5000/api/user/register/", json={'username' : username, 'password': password, 'salt': salt})
-	if 'result' not in r.json():
-		print "Error: {}".format(r.json()['error'])
-	else:
-		if r.json()['result'] == "true":
-			print "Account registered! You can now >login"
 try:
 	main()
+	print "Thanks for playing, all your data has been saved."
 except KeyboardInterrupt:
 	print ""
 	print "Goodbye :)"

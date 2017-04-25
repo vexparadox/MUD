@@ -2,6 +2,7 @@ from flask import Flask, request, jsonify
 import hashlib
 import MySQLdb
 import uuid
+from worldmap import *
 app = Flask(__name__)
 db = MySQLdb.connect("localhost","root","","flask")
 cursor = db.cursor()
@@ -38,6 +39,10 @@ def location():
 			return jsonify({'error': "Invalid token."})
 	else:
 		return jsonify({'error': "Incorrect data format."})
+@app.route('/api/world/map/', methods=['GET'])
+def getMap():
+	global worldmap
+	return jsonify(worldmap)
 
 @app.route('/api/user/register/', methods=['POST'])
 def register():
