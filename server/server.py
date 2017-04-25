@@ -3,8 +3,8 @@ import hashlib
 import MySQLdb
 import uuid
 from worldmap import *
+from config import *
 app = Flask(__name__)
-db = MySQLdb.connect("localhost","root","","flask")
 cursor = db.cursor()
 
 # Updates the token with the userID, used on login
@@ -111,6 +111,6 @@ def quests():
 		return jsonify({'error': "Invalid token."})
 
 if __name__ == "__main__":
-    app.run()
+    app.run(host=IPAddress)
     db.close()
     cursor.close()

@@ -154,8 +154,8 @@ def register():
 	if password != password2:
 		print "Passwords don't match, try again."
 		return
-	if len(username) < 6 or len(password) < 6:
-		print "Username and password must be greater than 6 characters."
+	if len(username) < 4 or len(password) < 6:
+		print "Username must be greater than 4 characters and password must be greater than 6 characters."
 		return
 	salt = uuid.uuid4().hex
 	password = hashlib.sha256(password+salt).hexdigest()
