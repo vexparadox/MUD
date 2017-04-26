@@ -28,6 +28,27 @@ def checkToken(token):
 		return False
 	else:
 		return True
+@app.route('/api/user/inventory/', methods=['POST'])
+def getInventory():
+	if not request.json:
+		return jsonify({'error': "No data detected."})
+	if 'token' in request.json:
+		if checkToken(request.json['token']):
+			items = []
+			cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
+			cursor.execute("SELECT * FROM items WHERE userID = %s", (cursor.fetchone()[0],))
+			results = cursor.fetchall()
+			for r in results:
+				i = {
+					'id' : r[1],
+					'count': r[3]
+				}
+				items.append(i)
+			return jsonify({'result': 'true', 'items': items})
+		else:
+			return jsonify({'error': "Invalid token."})
+	else:
+		return jsonify({'error': "Invalid data format."})
 
 @app.route('/api/user/stats/', methods=['POST'])
 def getStats():
@@ -126,6 +147,7 @@ def register():
 		# add to the database
 		try:
 			cursor.execute("INSERT INTO users (username, password, salt, location, token, strength, fortitude, charisma, wisdom, dexterity) VALUES(%s, %s, %s, '1', '', '1', '1', '1', '1', '1')", (request.json['username'], request.json['password'], request.json['salt']))
+			cursor.execute("INSERT INTO items (itemID, userID) VALUES ('0', LAST_INSERT_ID())")
 			db.commit()
 			return jsonify({'result': 'true'})
 		except:

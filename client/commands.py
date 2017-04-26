@@ -54,8 +54,36 @@ def move(parameters):
 			print "--------------------"
 	else:
 		print "Direction needs to be <n/e/s/w>."
+class Found(Exception): pass
 def inventory(parameters):
-	print parameters
+	global loggedIn
+	global items
+	if not loggedIn:
+		print "Please use the >login command first."
+		return
+	r = requests.post(baseURL+"/api/user/inventory/", json={'token': userToken})
+	if 'items' not in r.json():
+		print "You don't seem to have anything on you."
+	else:
+		# Create an array the same as the items
+		myitems = [0] * len(items)
+		# For each item found, add to the count
+		for i in r.json()['items']:
+			myitems[i['id']] += i['count']
+		# Loop through the myitems
+		for i in range(len(myitems)):
+			# if there's one, just print it
+			if myitems[i] == 1:
+				print items[i]['name']
+				print items[i]['description']
+				print "Damage: {}".format(items[i]['damage'])
+				print "-----------------"
+			elif myitems[i] > 1:
+				# if there's multiple print the plural version
+				print "{} {}".format(myitems[i], items[i]['plural'])
+				print items[i]['description']
+				print "Damage: {}".format(items[i]['damage'])
+				print "-----------------"
 def printHelp():
 	print " ==== Help ==== "
 	print " Welcome to Muddy Pyddle "

@@ -47,3 +47,8 @@ Table: users
 | charisma  | int(11)      | YES  |     | NULL    |                |
 | wisdom    | int(11)      | YES  |     | NULL    |                |
 | dexterity | int(11)      | YES  |     | NULL    |                |
+
+## Known issues
+
+* Multiple usernames are allowed
+* The world movement is a bit messy
