@@ -32,7 +32,7 @@ def switchCommands(command, parameters):
 	if command == "login":
 		commands.login()
 		return
-	if command == "move":
+	if command == "move" or command == "go":
 		commands.move(parameters)
 		return
 	if command == "register":
@@ -48,9 +48,10 @@ def switchCommands(command, parameters):
 		commands.location()
 		return
 	print "Unknown command, try using \"help\" or \"?\""
-try:
-	main()
-	print "Thanks for playing, all your data has been saved."
-except KeyboardInterrupt:
-	print ""
-	print "Goodbye :)"
+if __name__ == '__main__':
+	try:
+		main()
+		print "Thanks for playing, all your data has been saved."
+	except KeyboardInterrupt:
+		print ""
+		print "Goodbye :)"

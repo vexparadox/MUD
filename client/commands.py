@@ -57,15 +57,19 @@ def move(parameters):
 
 def printHelp():
 	print " ==== Help ==== "
+	print " Welcome to Muddy Pyddle "
+	print " <>   denotes optional values"
+	print " []   denotes mandatory values"
+	print " === Commands === "
 	print "quit/exit/q - exit the program"
 	print "help/? - this helpful information"
 	print "login - login to your account"
 	print "register - register a new account"
 	print " === Requires Login === "
 	print "quests - list the quests available on the server"
-	print "location/loc - where is your character in the world"
+	print "location/loc - where is am I?"
 	print "look <n/e/s/w> - take a look around"
-	print "move [n/e/s/w] - move in a direction"
+	print "move/go [n/e/s/w] - move in a direction"
 # Get the quests, checks for login
 def quests(parameter):
 	global userToken
