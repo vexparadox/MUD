@@ -3,8 +3,8 @@ import sys
 from globals import *
 def main():
 	global running
-	if not commands.getMap():
-		print "Map failed to download, server seems to be down."
+	if not commands.getStartData():
+		print "Data failed to download, server seems to be down."
 		return
 	userInput = ""
 	print "Welcome to MUD, type \"help\" for a list of commands."

@@ -166,15 +166,22 @@ def look(parameters):
 		return
 	else:
 		print "Direction must be <n/e/s/w>."
-def getMap():
+# Download the map and a list of items
+def getStartData():
 	global worldmap
+	global items
 	try:
 		r = requests.get(baseURL+"/api/world/map/")
 		if 'worldmap' not in r.json():
 			return False
 		else:
 			worldmap = r.json()['worldmap']
-			return True
+		r = requests.get(baseURL+"/api/world/items")
+		if 'items' not in r.json():
+			return False
+		else:
+			items = r.json()['items']
+		return True
 	except requests.ConnectionError:
 		print "Couldn't connect to the server."
 		return False

@@ -4,6 +4,7 @@ import sys
 import MySQLdb
 import uuid
 from worldmap import *
+from items import *
 from config import *
 app = Flask(__name__)
 cursor = db.cursor()
@@ -111,6 +112,11 @@ def location():
 def getMap():
 	global worldmap
 	return jsonify(worldmap)
+
+@app.route('/api/world/items/', methods=['GET'])
+def getItems():
+	global items
+	return jsonify(items)
 
 @app.route('/api/user/register/', methods=['POST'])
 def register():

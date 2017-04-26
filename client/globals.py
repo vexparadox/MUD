@@ -3,3 +3,4 @@ loggedIn = False # If the user is logged in setting this to true abitrarily wont
 running = True # If the program is running, set to False to stop
 baseURL = "http://localhost:5000" # The base url of the server
 worldmap = [] # This will be filled in later
+items = [] # This will be filled in later
