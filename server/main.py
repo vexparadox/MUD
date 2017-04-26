@@ -27,6 +27,21 @@ def checkToken(token):
 		return False
 	else:
 		return True
+
+@app.route('/api/user/stats/', methods=['POST'])
+def getStats():
+	if not request.json:
+		return jsonify({'error': "No data detected."})
+	if 'token' in request.json:
+		if checkToken(request.json['token']):
+			cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
+			result = cursor.fetchone()
+			return jsonify({'strength': result[6], 'fortitude': result[7], 'charisma': result[8], 'wisdom': result[9], 'dexterity': result[10]})
+		else:
+			return jsonify({'error': "Invalid token."})
+	else:
+		return jsonify({'error': "Invalid data format."})
+
 def movePlayer(currentLoc, direction):
 	if direction in ['n', 'e', 's', 'w']:
 		cols = currentLoc%(worldmap['width']+1) # +1 because 2%2 is 0 but the col is 2
@@ -104,7 +119,7 @@ def register():
 	if 'username' and 'password' and 'salt' in request.json:
 		# add to the database
 		try:
-			cursor.execute("INSERT INTO users (username, password, salt, location, token) VALUES(%s, %s, %s, '1', '')", (request.json['username'], request.json['password'], request.json['salt']))
+			cursor.execute("INSERT INTO users (username, password, salt, location, token, strength, fortitude, charisma, wisdom, dexterity) VALUES(%s, %s, %s, '1', '', '1', '1', '1', '1', '1')", (request.json['username'], request.json['password'], request.json['salt']))
 			db.commit()
 			return jsonify({'result': 'true'})
 		except:

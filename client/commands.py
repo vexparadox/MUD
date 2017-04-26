@@ -54,7 +54,8 @@ def move(parameters):
 			print "--------------------"
 	else:
 		print "Direction needs to be <n/e/s/w>."
-
+def inventory(parameters):
+	print parameters
 def printHelp():
 	print " ==== Help ==== "
 	print " Welcome to Muddy Pyddle "
@@ -66,8 +67,10 @@ def printHelp():
 	print "login - login to your account"
 	print "register - register a new account"
 	print " === Requires Login === "
-	print "quests - list the quests available on the server"
-	print "location/loc - where is am I?"
+	print "inv - look at your inventory"
+	print "stats - look at your stats"
+	print "quests - list the quests available where you are"
+	print "location/loc - where is your character"
 	print "look <n/e/s/w> - take a look around"
 	print "move/go [n/e/s/w] - move in a direction"
 # Get the quests, checks for login
@@ -93,13 +96,33 @@ def getQuests():
 			print "Description > {}".format(quest['description'])
 			print "QuestID > {}".format(quest['questID'])
 			print "--------------------"
-
+# Get the users stats
+def stats():
+	global loggedIn
+	if not loggedIn:
+		print "Please use the >login command first."
+		return
+	else:
+		r = requests.post(baseURL+"/api/user/stats/", json={'token': userToken})
+		if 'error' in r.json():
+			print "Error: {}".format(r.json()['error'])
+		else:
+			print " ==== Stats ==== "
+			print "Strength  -  {}".format(r.json()['strength'])
+			print "Fortitude -  {}".format(r.json()['fortitude'])
+			print "Charisma  -  {}".format(r.json()['charisma'])
+			print "Wisdom    -  {}".format(r.json()['wisdom'])
+			print "Dexterity -  {}".format(r.json()['dexterity'])
+			print "-----------------"
 # Get the location of the user from the server
 def location():
 	global userToken
 	global loggedIn
 	global worldmap
-	if loggedIn:
+	if not loggedIn:
+		print "Please use the >login command first."
+		return
+	else:
 		loc = getLocation()
 		if loc != None:
 			print " === Current Location === "
@@ -108,8 +131,6 @@ def location():
 			print "--------------------"
 		else:
 			print "Couldn't locate your character."
-	else:
-		print "Please use >login first."
 def getLocation():
 	global userToken
 	try:

@@ -39,8 +39,11 @@ def switchCommands(command, parameters):
 	if command == "register":
 		commands.register()
 		return
+	if command == "stats":
+		commands.stats()
+		return
 	if command == "inv":
-		commands.inventory()
+		commands.inventory(parameters)
 		return
 	if command == "look":
 		commands.look(parameters)

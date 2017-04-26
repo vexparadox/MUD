@@ -15,7 +15,7 @@ worldmap = {
 		{
 			'id': 2,
 			'title': 'Forest path',
-			'description': 'A heavily trodden path through the forest, the air carries and air of tension.',
+			'description': 'A heavily trodden path through the forest, the air carried palpable tension.',
 			'here': 'There\'s something eary about this place... You smell goblins.',
 			'n': 'To the north you see the world falling away, you wonder how this place came to be.',
 			'e': 'You turn to the east, you can see a small settlement in the distance.',
@@ -25,8 +25,8 @@ worldmap = {
 		{
 			'id': 3,
 			'title': 'Crattelish Outpost',
-			'description': 'An outpost manned by the proud and handsom Crattelish people.',
-			'here': 'This place feels safe. There\'s a message board on the side of a hut, it has messages of other travellers.\nTaking a closer look there\'s also some jobs posted here.' ,
+			'description': 'An outpost manned by the proud but fickle Crattelish people.',
+			'here': 'This place feels safe. There\'s a message board on the side of a hut, it has messages of other travellers.\nTaking a closer look there\'s also some job postings.' ,
 			'n': 'To the north the ground slips away into the void.',
 			'e': 'The east carries a sense of danger, you decide to go another day.',
 			's': 'Looking to the south you see a break in the thick forest, there seems to be a path.',
