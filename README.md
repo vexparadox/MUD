@@ -33,9 +33,9 @@ python main.py "localhost"
 
 ## MYSQL
 Table: users
-+-----------+--------------+------+-----+---------+----------------+
+
 | Field     | Type         | Null | Key | Default | Extra          |
-+-----------+--------------+------+-----+---------+----------------+
+|:-:|:-:|:-:|:-:|:-:|:-:|
 | userID    | int(11)      | NO   | PRI | NULL    | auto_increment |
 | username  | varchar(255) | YES  |     | NULL    |                |
 | password  | varchar(512) | YES  |     | NULL    |                |
@@ -47,4 +47,3 @@ Table: users
 | charisma  | int(11)      | YES  |     | NULL    |                |
 | wisdom    | int(11)      | YES  |     | NULL    |                |
 | dexterity | int(11)      | YES  |     | NULL    |                |
-+-----------+--------------+------+-----+---------+----------------+
