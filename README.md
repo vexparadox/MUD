@@ -2,6 +2,19 @@
 
 This is a MUD built in Python that gives a web API
 
+## Client
+
+The URL is optional, it will default to localhost:5000
+```Shell
+python main.py "http://localhost:5000"
+```
+
+## Server
+You must setup the mysql info in config.py. See below for schema required.
+```Shell
+python main.py "localhost"
+```
+
 ## API
 
 | URL  | Usage  | Data  | Returns  | Notes  |

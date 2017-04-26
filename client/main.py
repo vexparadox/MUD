@@ -1,4 +1,5 @@
 import commands
+import sys
 from globals import *
 def main():
 	global running
@@ -49,6 +50,8 @@ def switchCommands(command, parameters):
 		return
 	print "Unknown command, try using \"help\" or \"?\""
 if __name__ == '__main__':
+	if len(sys.argv) > 1:
+		baseURL = sys.argv[1]
 	try:
 		main()
 		print "Thanks for playing, all your data has been saved."

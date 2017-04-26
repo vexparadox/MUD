@@ -1,5 +1,6 @@
 from flask import Flask, request, jsonify
 import hashlib
+import sys
 import MySQLdb
 import uuid
 from worldmap import *
@@ -164,6 +165,8 @@ def quests():
 		return jsonify({'error': "Invalid token."})
 
 if __name__ == "__main__":
-    app.run(host=IPAddress)
-    db.close()
-    cursor.close()
+	if len(sys.argv) > 1:
+		IPAddress = sys.argv[1]
+	app.run(host=IPAddress)
+	db.close()
+	cursor.close()
