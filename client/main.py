@@ -32,6 +32,9 @@ def switchCommands(command, parameters):
 	if command == "login":
 		commands.login()
 		return
+	if command == "move":
+		commands.move(parameters)
+		return
 	if command == "register":
 		commands.register()
 		return

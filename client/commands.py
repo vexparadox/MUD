@@ -27,13 +27,33 @@ def login():
 				loggedIn = True
 				loc = getLocation()
 				if loc != None:
-					print "You awake and find yourself in {}".format(worldmap[loc]['title'])
+					print "You awake and find yourself in {}".format(worldmap[loc-1]['title'])
 				else:
 					print "Login succeded."
 				return
 			else:
 				print "Login failed. Probably a wrong password"
 				loggedIn = False
+def move(parameters):
+	global loggedIn
+	if not loggedIn:
+		print "Please use the >login command first."
+		return
+	if len(parameters) < 1:
+		print "You need to specify a direction."
+		return
+	if parameters[0] in ['n', 'e', 's', 'w']:
+		r = requests.post(baseURL+"/api/user/move/", json={'token': userToken, 'direction': parameters[0]})
+		if 'result' not in r.json():
+			print "It seems you can't move in this direction, try >look around."
+		else:
+			print "You travel {}".format(parameters[0])
+			print " === New Location === "
+			print worldmap[r.json()['location']-1]['title']
+			print worldmap[r.json()['location']-1]['description']
+			print "--------------------"
+	else:
+		print "Direction needs to be <n/e/s/w>."
 
 def printHelp():
 	print " ==== Help ==== "
@@ -44,7 +64,8 @@ def printHelp():
 	print " === Requires Login === "
 	print "quests - list the quests available on the server"
 	print "location/loc - where is your character in the world"
-	print "look <n/e/s/w>- take a look around"
+	print "look <n/e/s/w> - take a look around"
+	print "move [n/e/s/w] - move in a direction"
 # Get the quests, checks for login
 def quests(parameter):
 	global userToken
@@ -78,8 +99,8 @@ def location():
 		loc = getLocation()
 		if loc != None:
 			print " === Current Location === "
-			print worldmap[loc]['title']
-			print worldmap[loc]['description']
+			print worldmap[loc-1]['title']
+			print worldmap[loc-1]['description']
 			print "--------------------"
 		else:
 			print "Couldn't locate your character."
@@ -112,11 +133,11 @@ def look(parameters):
 		return
 	# If there's no parameters given
 	if len(parameters) < 1:
-		print worldmap[loc]['here']
+		print worldmap[loc-1]['here']
 		return
 	# If the parameters are correct
 	if parameters[0] in ['n', 'e', 's', 'w']:
-		print worldmap[loc][parameters[0]]
+		print worldmap[loc-1][parameters[0]]
 		return
 	else:
 		print "Direction must be <n/e/s/w>."
