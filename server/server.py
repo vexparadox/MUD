@@ -26,7 +26,59 @@ def checkToken(token):
 		return False
 	else:
 		return True
-
+def movePlayer(currentLoc, direction):
+	if direction in ['n', 'e', 's', 'w']:
+		cols = currentLoc%(worldmap['width']+1) # +1 because 2%2 is 0 but the col is 2
+		rows = ((currentLoc-cols)/worldmap['width'])+1
+		print "column: ",cols
+		print "row: ",rows
+		if direction == 'e':
+			if cols+1 > worldmap['width']:
+				return None
+			else:
+				return currentLoc+1
+		elif direction == 'w':
+			if cols-1 < 1:
+				return None
+			else:
+				return currentLoc-1;
+		elif direction == 'n':
+			if rows-1 < 1:
+				return None
+			else:
+				return currentLoc-worldmap['width']
+		elif direction == 's':
+			if rows+1 > worldmap['height']:
+				return None
+			else:
+				return currentLoc+worldmap['width']
+	else:
+		return None
+@app.route('/api/user/move/', methods=['POST'])
+def move():
+	if not request.json:
+		return jsonify({'error': "No data detected."})
+	if 'token' in request.json:
+		if checkToken(request.json['token']):
+			if 'direction' in request.json:
+				cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
+				newLoc = movePlayer(cursor.fetchone()[4], request.json['direction'])
+				if newLoc != None:
+					try:
+						cursor.execute("UPDATE users SET location = %s WHERE token = %s", (newLoc, request.json['token']))
+						db.commit()
+						return jsonify({'result': 'true', 'location': newLoc})
+					except:
+						db.rollback()
+						return jsonify({'error': 'Database failed to write.'})
+				else:
+					return jsonify({'error': "Invalid move."})
+			else:
+				return jsonify({'error': "Incorrect data format."})
+		else:
+			return jsonify({'error': "Invalid token."})
+	else:
+		return jsonify({'error': "Incorrect data format."})
 @app.route('/api/user/location/', methods=['POST'])
 def location():
 	if not request.json:
@@ -51,7 +103,7 @@ def register():
 	if 'username' and 'password' and 'salt' in request.json:
 		# add to the database
 		try:
-			cursor.execute("INSERT INTO users (username, password, salt, location, token) VALUES(%s, %s, %s, '0', '')", (request.json['username'], request.json['password'], request.json['salt']))
+			cursor.execute("INSERT INTO users (username, password, salt, location, token) VALUES(%s, %s, %s, '1', '')", (request.json['username'], request.json['password'], request.json['salt']))
 			db.commit()
 			return jsonify({'result': 'true'})
 		except:
@@ -97,7 +149,8 @@ def quests():
 		return jsonify({'error': "No data detected."})
 	if checkToken(request.json['token']):
 		quests = []
-		cursor.execute("SELECT * FROM quests")
+		cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
+		cursor.execute("SELECT * FROM quests WHERE location = %s", (cursor.fetchone()[4],))
 		results = cursor.fetchall()
 		for r in results:
 			q = {

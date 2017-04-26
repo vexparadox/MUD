@@ -1,3 +1,3 @@
 import MySQLdb
-IPAddress = "0.0.0.0"
+IPAddress = "localhost"
 db = MySQLdb.connect("localhost","root","","flask")
