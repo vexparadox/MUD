@@ -107,11 +107,11 @@ def printHelp():
 	print "login - login to your account"
 	print "register - register a new account"
 	print " === Requires Login === "
-	print "inv - look at your inventory"
+	print "inv/i - look at your inventory"
 	print "stats - look at your stats"
 	print "quests - list the quests available where you are"
 	print "location/loc - where is your character"
-	print "look <n/e/s/w> - take a look around"
+	print "look/l <n/e/s/w> - take a look around"
 	print "move/go [n/e/s/w] - move in a direction"
 # Get the quests, checks for login
 def quests(parameter):

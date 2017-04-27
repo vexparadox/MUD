@@ -18,7 +18,7 @@ worldmap = {
 			'id': 1,
 			'title': 'Forest path',
 			'description': 'A heavily trodden path through the forest, the air carries palpable tension.',
-			'here': 'There\'s something eary about this place... You smell the sweat of Golbins.',
+			'here': 'There\'s something eary about this place... You smell the sweat of Goblins.',
 			'n': 'To the north you see the world falling away, you wonder how this place came to be.',
 			'e': 'You turn to the east, you can see a small settlement in the distance.',
 			's': 'The thick forest continues, it looks more alive than you expected.',

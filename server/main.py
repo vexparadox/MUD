@@ -34,7 +34,6 @@ def isMapPassable(location):
 	global worldmap
 	# Check the 1D map using x,y
 	loc1D = getMapIndex(location['x'], location['y'])
-	print loc1D
 	if worldmap['worldmap'][loc1D]['passable'] == "true":
 		return True
 	else:

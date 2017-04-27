@@ -42,10 +42,10 @@ def switchCommands(command, parameters):
 	if command == "stats":
 		commands.stats()
 		return
-	if command == "inv":
+	if command == "inv" or command == "i":
 		commands.inventory(parameters)
 		return
-	if command == "look":
+	if command == "look" or command == "l":
 		commands.look(parameters)
 		return
 	if command == "location" or command == "loc":
@@ -53,6 +53,7 @@ def switchCommands(command, parameters):
 		return
 	print "Unknown command, try using \"help\" or \"?\""
 if __name__ == '__main__':
+	global baseURL
 	if len(sys.argv) > 1:
 		baseURL = sys.argv[1]
 	try:
