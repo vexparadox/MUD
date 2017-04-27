@@ -45,16 +45,19 @@ def move(parameters):
 	if parameters[0] in ['n', 'e', 's', 'w']:
 		r = requests.post(baseURL+"/api/user/move/", json={'token': userToken, 'direction': parameters[0]})
 		if 'result' not in r.json():
-			print "It seems you can't move in this direction, try >look around."
+			print r.json()['error']
 		else:
-			print "You travel {}".format(parameters[0])
-			print " === New Location === "
-			print worldmap[r.json()['location']-1]['title']
-			print worldmap[r.json()['location']-1]['description']
-			print "--------------------"
+			if r.json()['result'] == "true":
+				print "You travel {}".format(parameters[0])
+				print " === New Location === "
+				print worldmap[r.json()['location']-1]['title']
+				print worldmap[r.json()['location']-1]['description']
+				print "--------------------"
+			else:
+				print "You can't go this way."
+				print r.json()['error']
 	else:
 		print "Direction needs to be <n/e/s/w>."
-class Found(Exception): pass
 def inventory(parameters):
 	global loggedIn
 	global items
@@ -63,14 +66,18 @@ def inventory(parameters):
 		return
 	r = requests.post(baseURL+"/api/user/inventory/", json={'token': userToken})
 	if 'items' not in r.json():
-		print "You don't seem to have anything on you."
+		print "Error: {}".format(r.json()['error'])
 	else:
+		if len(r.json()['items']) < 1:
+			print "You don't seem to have anything on you."
+			return
 		# Create an array the same as the items
 		myitems = [0] * len(items)
 		# For each item found, add to the count
 		for i in r.json()['items']:
 			myitems[i['id']] += i['count']
 		# Loop through the myitems
+		print " ==== Inventory ==== "
 		for i in range(len(myitems)):
 			# if there's one, just print it
 			if myitems[i] == 1:
@@ -204,7 +211,7 @@ def getStartData():
 			return False
 		else:
 			worldmap = r.json()['worldmap']
-		r = requests.get(baseURL+"/api/world/items")
+		r = requests.get(baseURL+"/api/world/items/")
 		if 'items' not in r.json():
 			return False
 		else:
