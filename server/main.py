@@ -11,6 +11,9 @@ cursor = db.cursor()
 
 # Updates the token with the userID, used on login
 # Returns true or false
+def getMapIndex(x, y):
+	global worldmap
+	return y*worldmap['width']+x
 def updateToken(userID, token):
 	try:
 		cursor.execute("UPDATE users SET token = %s WHERE userID = %s", (token, userID))
@@ -29,28 +32,33 @@ def checkToken(token):
 # Checks if the map location is marked as passable
 def isMapPassable(location):
 	global worldmap
-	if worldmap['worldmap'][(location-1)]['passable'] == "true":
+	# Check the 1D map using x,y
+	loc1D = getMapIndex(location['x'], location['y'])
+	print loc1D
+	if worldmap['worldmap'][loc1D]['passable'] == "true":
 		return True
 	else:
 		return False
 # Checks if the given inventory has the requirements for the location
 def requiredMapItems(inventory, location):
 	global worldmap
-	required = worldmap['worldmap'][(location-1)]['requireditems']
+	global items
+	loc1D = getMapIndex(location['x'], location['y'])
+	required = worldmap['worldmap'][loc1D]['requireditems']
 	# If there's no required items
 	if len(required) < 1:
 		return True
 	else:
-		items = []
+		invitems = []
 		# Build an array of ids in the inventory
 		for i in inventory:
-			items.append(i['id'])
+			invitems.append(i['id'])
 		# Loop over the required array
 		for r in required:
 			# Loop through the items
-			for i in items:
+			for i in invitems:
 				# If they match remove them from the list
-				if r == i:
+				if r == items['items'][i]['type']:
 					required.remove(r)
 		# if the list is empty, return true
 		# All the required items are met
@@ -73,28 +81,32 @@ def getInventory(userID):
 	return items
 def movePlayer(currentLoc, direction):
 	if direction in ['n', 'e', 's', 'w']:
-		cols = currentLoc%(worldmap['width']+1) # +1 because 2%2 is 0 but the col is 2
-		rows = ((currentLoc-cols)/worldmap['width'])+1
+		cols = currentLoc['x']
+		rows = currentLoc['y']
 		if direction == 'e':
-			if cols+1 > worldmap['width']:
+			if cols+1 >= worldmap['width']:
 				return None
 			else:
-				return currentLoc+1
+				currentLoc['x'] += 1
+				return currentLoc
 		elif direction == 'w':
-			if cols-1 < 1:
+			if cols <= 0:
 				return None
 			else:
-				return currentLoc-1;
+				currentLoc['x'] -= 1
+				return currentLoc;
 		elif direction == 'n':
-			if rows-1 < 1:
+			if rows <= 0:
 				return None
 			else:
-				return currentLoc-worldmap['width']
+				currentLoc['y'] -= 1
+				return currentLoc
 		elif direction == 's':
-			if rows+1 > worldmap['height']:
+			if rows+1 >= worldmap['height']:
 				return None
 			else:
-				return currentLoc+worldmap['width']
+				currentLoc['y'] += 1
+				return currentLoc
 	else:
 		return None
 @app.route('/api/user/inventory/', methods=['POST'])
@@ -136,22 +148,27 @@ def move():
 				cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
 				result = cursor.fetchone()
 				userID = result[0] # userID is the 1st
-				oldLocation = result[4] # Location is the 4th 
+				oldLocation = {}
+				oldLocation['x'] = result[4] # Location X is the 4th 
+				oldLocation['y'] = result[5] # Location Y is the 5th 
 				newLoc = movePlayer(oldLocation, request.json['direction'])
+				# newLoc is a ['x'] and ['y'] object
 				inventory = getInventory(userID)
 				# movePlayer will return None if the move isn't allowed (aka outside of the map)
 				if newLoc != None:
+					# Get the 1d map index
+					mapindex = getMapIndex(newLoc['x'], newLoc['y'])
 					# make sure it's passable
 					if not isMapPassable(newLoc):
-						return jsonify({'error': "You can't pass through here.", 'result': 'false', 'location': newLoc})
+						return jsonify({'error': "You can't pass through here.", 'result': 'false', 'location': {'x' : newLoc['x'], 'y': newLoc['y'], 'mapindex': mapindex}})
 					# Check for required items
 					if not requiredMapItems(inventory, newLoc):
-						return jsonify({'error': "An item is required to go here.", 'result': 'false', 'location': newLoc})
+						return jsonify({'error': "An item is required to go here.", 'result': 'false', 'location': {'x' : newLoc['x'], 'y': newLoc['y'], 'mapindex': mapindex}})
 					# If all seems good, update the users location
 					try:
-						cursor.execute("UPDATE users SET location = %s WHERE token = %s", (newLoc, request.json['token']))
+						cursor.execute("UPDATE users SET locx = %s, locy = %s WHERE token = %s", (newLoc['x'], newLoc['y'], request.json['token']))
 						db.commit()
-						return jsonify({'result': 'true', 'location': newLoc})
+						return jsonify({'result': 'true', 'location': {'x' : newLoc['x'], 'y': newLoc['y'], 'mapindex': mapindex} })
 					except:
 						db.rollback()
 						return jsonify({'error': 'Database failed to write.'})
@@ -170,7 +187,9 @@ def location():
 	if 'token' in request.json:
 		if checkToken(request.json['token']):
 			cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
-			return jsonify({'location': cursor.fetchone()[4]})
+			result = cursor.fetchone()
+			mapindex = getMapIndex(result[4], result[5])
+			return jsonify({'location': {'x' : result[4], 'y': result[5], 'mapindex': mapindex} })
 		else:
 			return jsonify({'error': "Invalid token."})
 	else:
@@ -192,7 +211,7 @@ def register():
 	if 'username' and 'password' and 'salt' in request.json:
 		# add to the database
 		try:
-			cursor.execute("INSERT INTO users (username, password, salt, location, token, strength, fortitude, charisma, wisdom, dexterity) VALUES(%s, %s, %s, '1', '', '1', '1', '1', '1', '1')", (request.json['username'], request.json['password'], request.json['salt']))
+			cursor.execute("INSERT INTO users (username, password, salt, token, strength, fortitude, charisma, wisdom, dexterity) VALUES(%s, %s, %s, '', '1', '1', '1', '1', '1')", (request.json['username'], request.json['password'], request.json['salt']))
 			cursor.execute("INSERT INTO items (itemID, userID) VALUES ('0', LAST_INSERT_ID())")
 			db.commit()
 			return jsonify({'result': 'true'})
@@ -240,7 +259,8 @@ def quests():
 	if checkToken(request.json['token']):
 		quests = []
 		cursor.execute("SELECT * FROM users WHERE token = %s", (request.json['token'],))
-		cursor.execute("SELECT * FROM quests WHERE location = %s", (cursor.fetchone()[4],))
+		result = cursor.fetchone()
+		cursor.execute("SELECT * FROM quests WHERE locx = %s AND locy = %s", (result[4], result[5]))
 		results = cursor.fetchall()
 		for r in results:
 			q = {

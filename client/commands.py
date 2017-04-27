@@ -27,7 +27,7 @@ def login():
 				loggedIn = True
 				loc = getLocation()
 				if loc != None:
-					print "You awake and find yourself in {}".format(worldmap[loc-1]['title'])
+					print "You awake and find yourself in {}".format(worldmap[loc['mapindex']]['title'])
 				else:
 					print "Login succeded."
 				return
@@ -36,6 +36,7 @@ def login():
 				loggedIn = False
 def move(parameters):
 	global loggedIn
+	global worldmap
 	if not loggedIn:
 		print "Please use the >login command first."
 		return
@@ -48,14 +49,17 @@ def move(parameters):
 			print r.json()['error']
 		else:
 			if r.json()['result'] == "true":
+				loc = r.json()['location']
 				print "You travel {}".format(parameters[0])
 				print " === New Location === "
-				print worldmap[r.json()['location']-1]['title']
-				print worldmap[r.json()['location']-1]['description']
+				print worldmap[loc['mapindex']]['title']
+				print worldmap[loc['mapindex']]['description']
 				print "--------------------"
 			else:
 				print "You can't go this way."
 				print r.json()['error']
+				if "item" in r.json()['error']:
+					print "You need a tool of the type: {}".format(worldmap[r.json()['location']['mapindex']]['requireditems'][0])
 	else:
 		print "Direction needs to be <n/e/s/w>."
 def inventory(parameters):
@@ -84,6 +88,7 @@ def inventory(parameters):
 				print items[i]['name']
 				print items[i]['description']
 				print "Damage: {}".format(items[i]['damage'])
+				print "Type: {}".format(items[i]['type'])
 				print "-----------------"
 			elif myitems[i] > 1:
 				# if there's multiple print the plural version
@@ -160,12 +165,14 @@ def location():
 	else:
 		loc = getLocation()
 		if loc != None:
+			# // FIX
 			print " === Current Location === "
-			print worldmap[loc-1]['title']
-			print worldmap[loc-1]['description']
+			print worldmap[loc['mapindex']]['title']
+			print worldmap[loc['mapindex']]['description']
 			print "--------------------"
 		else:
 			print "Couldn't locate your character."
+# Get the location, returns an object with ['x'] and ['y'] fields
 def getLocation():
 	global userToken
 	try:
@@ -193,17 +200,19 @@ def look(parameters):
 		return
 	# If there's no parameters given
 	if len(parameters) < 1:
-		print worldmap[loc-1]['here']
+		print worldmap[loc['mapindex']]['here']
 		return
 	# If the parameters are correct
 	if parameters[0] in ['n', 'e', 's', 'w']:
-		print worldmap[loc-1][parameters[0]]
+		print worldmap[loc['mapindex']][parameters[0]]
 		return
 	else:
 		print "Direction must be <n/e/s/w>."
 # Download the map and a list of items
 def getStartData():
 	global worldmap
+	global worldheight
+	global worldwidth
 	global items
 	try:
 		r = requests.get(baseURL+"/api/world/map/")
@@ -211,6 +220,8 @@ def getStartData():
 			return False
 		else:
 			worldmap = r.json()['worldmap']
+			worldheight = r.json()['height']
+			worldwidth = r.json()['width']
 		r = requests.get(baseURL+"/api/world/items/")
 		if 'items' not in r.json():
 			return False
